@@ -9,7 +9,7 @@ from uuid import UUID
 
 MY_SERVICE_BASE_UUID = UUID('f96d0000-1139-4e07-8ccf-d28be904fc0f')
 # Address of BLE device to connect to.
-BLE_ADDRESS = "E8:6C:A2:E3:C6:65"
+BLE_ADDRESS = "e8:6c:a2:e3:c6:65"
 
 class ScanDelegate(DefaultDelegate):
     def __init__(self, q):
@@ -21,21 +21,27 @@ class ScanDelegate(DefaultDelegate):
         #             AD Type(1) + AD Data(n)
         #                          Service UUID(16) + Data(m)
         if isNewDev:
-            print("Discoverd device", dev.addr)
+            if dev.addr == BLE_ADDRESS:
+                logging.info('Discoverd device %s', dev.addr)
+                logging.info('RSSI= %s', dev.rssi)            
+            else:
+                return None
         elif isNewData:
-            print("Received new data from", dev.addr)
-
+            if dev.addr == BLE_ADDRESS:
+                logging.info('Received new data from %s', dev.addr)
+            else:
+                return None
         service_data = dev.getValue(ScanEntry.SERVICE_DATA_128B)
-        print(service_data)
         if service_data:
             data = service_data[16:]
             n = len(data)//2
             if n>0:
                 r_data = bytes(reversed(service_data[:16]))
                 service_uuid = UUID(bytes=r_data[:2]+b'\x00\x00'+r_data[4:16])
-                service_uuid16 = unpack("H", r_data[2:4])[0]
+                service_uuid16 = unpack('H', r_data[2:4])[0]
                 if service_uuid == MY_SERVICE_BASE_UUID:
-                    fields = unpack("{n}h", data)
+                    fields = unpack('nh', data)
+                    logging.info('fields: %s', fields)
                     logger.info('{0} {1} {2}'.format(dev.addr, service_uuid16, fields))
                     self.q.put(({
                         'measurement':'sensordata',
