@@ -40,7 +40,7 @@ class ScanDelegate(DefaultDelegate):
                 service_uuid = UUID(bytes=r_data[:2]+b'\x00\x00'+r_data[4:16])
                 service_uuid16 = unpack('H', r_data[2:4])[0]
                 if service_uuid == MY_SERVICE_BASE_UUID:
-                    fields = unpack('nh', data)
+                    fields = unpack('3h', data)
                     logging.info('fields: %s', fields)
                     logger.info('{0} {1} {2}'.format(dev.addr, service_uuid16, fields))
                     self.q.put(({
