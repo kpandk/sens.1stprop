@@ -6,6 +6,7 @@ from collections import deque, defaultdict
 from threading import Thread
 from queue import Queue, Empty
 from uuid import UUID
+from csv import writer
 
 MY_SERVICE_BASE_UUID = UUID('f96d0000-1139-4e07-8ccf-d28be904fc0f')
 # Address of BLE device to connect to.
@@ -42,14 +43,9 @@ class ScanDelegate(DefaultDelegate):
                 if service_uuid == MY_SERVICE_BASE_UUID:
                     fields = unpack('3h', data)
                     logging.info('fields: %s', fields)
-                    logger.info('{0} {1} {2}'.format(dev.addr, service_uuid16, fields))
-                    self.q.put(({
-                        'measurement':'sensordata',
-                        'tags':{'address':dev.addr, 'service_uuid16':service_uuid16},
-                        'fields':{'field{i}':v for i,v in enumerate(fields)},
-                        'time':datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')},
-                        'long_term_storage_policy'))
-
+                with open("/home/dpan/.sens_data/realtime_sens.csv", 'a+', newline='') as write_obj:
+                    csv_writer = writer(write_obj)
+                    csv_writer.writerow(fields)
 def main():
     q = Queue()
     #t = Thread(target=influxdb_writer, args=(db,q))
