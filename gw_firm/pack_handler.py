@@ -43,7 +43,7 @@ class ScanDelegate(DefaultDelegate):
                 if service_uuid == MY_SERVICE_BASE_UUID:
                     fields = unpack('3h', data)
                     logging.info('fields: %s', fields)
-                with open("/home/dpan/.sens_data/realtime_sens.csv", 'a+', newline='') as write_obj:
+                with open("/home/dpan/.sens_data/realtime_sens.csv", 'w+', newline='') as write_obj:
                     csv_writer = writer(write_obj)
                     csv_writer.writerow(fields)
 def main():
